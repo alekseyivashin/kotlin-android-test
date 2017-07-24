@@ -14,8 +14,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
-    fun sendEmail(view: View) {
-        val email: String = this.emailText.text.toString()
-        startActivity<ResultActivity>("email" to email)
+    fun addUser(view: View) {
+        startActivity<AddUserActivity>()
     }
 }
