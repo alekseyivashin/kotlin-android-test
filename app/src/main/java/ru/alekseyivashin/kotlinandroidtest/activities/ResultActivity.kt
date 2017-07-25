@@ -1,9 +1,9 @@
-package ru.alekseyivashin.kotlinandroidtest
+package ru.alekseyivashin.kotlinandroidtest.activities
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.EditText
 import kotlinx.android.synthetic.main.activity_result.*
+import ru.alekseyivashin.kotlinandroidtest.R
 
 class ResultActivity : AppCompatActivity() {
 

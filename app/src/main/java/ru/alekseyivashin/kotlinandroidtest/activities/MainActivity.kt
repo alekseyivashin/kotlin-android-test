@@ -1,11 +1,10 @@
-package ru.alekseyivashin.kotlinandroidtest
+package ru.alekseyivashin.kotlinandroidtest.activities
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.toast
+import ru.alekseyivashin.kotlinandroidtest.R
 
 class MainActivity : AppCompatActivity() {
 

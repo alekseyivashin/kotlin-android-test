@@ -1,36 +1,28 @@
-package ru.alekseyivashin.kotlinandroidtest
+package ru.alekseyivashin.kotlinandroidtest.activities
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.annotation.TargetApi
-import android.content.pm.PackageManager
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
-import android.app.LoaderManager.LoaderCallbacks
 
-import android.content.CursorLoader
-import android.content.Loader
-import android.database.Cursor
-import android.net.Uri
 import android.os.AsyncTask
 
 import android.os.Build
 import android.os.Bundle
-import android.provider.ContactsContract
 import android.text.TextUtils
-import android.view.KeyEvent
+import android.util.Log
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.inputmethod.EditorInfo
-import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-
-import java.util.ArrayList
-
-import android.Manifest.permission.READ_CONTACTS
+import kotlinx.android.synthetic.main.activity_add_user.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.debug
+import org.jetbrains.anko.info
+import org.jetbrains.anko.warn
+import ru.alekseyivashin.kotlinandroidtest.R
+import ru.alekseyivashin.kotlinandroidtest.models.User
 
 /**
  * A login screen that offers login via email/password.
@@ -48,33 +40,28 @@ class AddUserActivity : AppCompatActivity() {
     private var mLoginFormView: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_user)
-        // Set up the login form.
-        mEmailView = findViewById(R.id.email) as AutoCompleteTextView
 
-        mPasswordView = findViewById(R.id.password) as EditText
-        mPasswordView!!.setOnEditorActionListener(TextView.OnEditorActionListener { textView, id, keyEvent ->
+        mEmailView = this.email
+        mPasswordView = this.password
+
+        mPasswordView!!.setOnEditorActionListener(TextView.OnEditorActionListener { _, id, _ ->
             if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                attemptLogin()
+                addUser()
                 return@OnEditorActionListener true
             }
             false
         })
 
-        val mEmailSignInButton = findViewById(R.id.email_sign_in_button) as Button
-        mEmailSignInButton.setOnClickListener { attemptLogin() }
+        this.add_user_button.setOnClickListener { addUser() }
 
-        mLoginFormView = findViewById(R.id.login_form)
-        mProgressView = findViewById(R.id.login_progress)
+        mLoginFormView = this.login_form
+        mProgressView = this.login_progress
     }
 
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
-    private fun attemptLogin() {
+    private fun addUser() {
         if (mAuthTask != null) {
             return
         }
@@ -84,34 +71,16 @@ class AddUserActivity : AppCompatActivity() {
         mPasswordView!!.error = null
 
         // Store values at the time of the login attempt.
-        val email = mEmailView!!.text.toString()
-        val password = mPasswordView!!.text.toString()
+        val email: String = mEmailView!!.text.toString()
+        val password: String = mPasswordView!!.text.toString()
 
-        var cancel = false
-        var focusView: View? = null
+        val validationResult = validateFields(email, password)
+        if (validationResult != null) {
+            val view = validationResult.first
+            val message = validationResult.second
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView!!.error = getString(R.string.error_invalid_password)
-            focusView = mPasswordView
-            cancel = true
-        }
-
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView!!.error = getString(R.string.error_field_required)
-            focusView = mEmailView
-            cancel = true
-        } else if (!isEmailValid(email)) {
-            mEmailView!!.error = getString(R.string.error_invalid_email)
-            focusView = mEmailView
-            cancel = true
-        }
-
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView!!.requestFocus()
+            view.error = message
+            view.requestFocus()
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
@@ -121,14 +90,18 @@ class AddUserActivity : AppCompatActivity() {
         }
     }
 
-    private fun isEmailValid(email: String): Boolean {
-        //TODO: Replace this with your own logic
-        return email.contains("@")
-    }
+    private fun validateFields(email: String, password: String): Pair<TextView, String>? {
+        val errorFieldRequired: String = getString(R.string.error_field_required)
+        val errorEmailInvalid: String = getString(R.string.error_invalid_email)
+        val errorPasswordInvalid: String = getString(R.string.error_invalid_password)
 
-    private fun isPasswordValid(password: String): Boolean {
-        //TODO: Replace this with your own logic
-        return password.length > 4
+        return when {
+            TextUtils.isEmpty(email)    -> Pair(mEmailView as TextView, errorFieldRequired)
+            TextUtils.isEmpty(password) -> Pair(mPasswordView as TextView, errorFieldRequired)
+            !email.contains("@")        -> Pair(mEmailView as TextView, errorEmailInvalid)
+            password.length < 4         -> Pair(mPasswordView as TextView, errorPasswordInvalid)
+            else -> null
+        }
     }
 
     /**
@@ -171,6 +144,8 @@ class AddUserActivity : AppCompatActivity() {
      */
     private inner class UserLoginTask internal constructor(private val mEmail: String, private val mPassword: String) : AsyncTask<Void, Void, Boolean>() {
 
+        private val logger = AnkoLogger("USER")
+
         override fun doInBackground(vararg params: Void): Boolean? {
             // TODO: attempt authentication against a network service.
 
@@ -181,28 +156,12 @@ class AddUserActivity : AppCompatActivity() {
                 return false
             }
 
-            for (credential in DUMMY_CREDENTIALS) {
-                val pieces = credential.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                if (pieces[0] == mEmail) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1] == mPassword
-                }
-            }
+            CREDENTIALS.add(User(mEmail, mPassword))
 
-            // TODO: register the new account here.
+            logger.info(CREDENTIALS)
+
+            finish()
             return true
-        }
-
-        override fun onPostExecute(success: Boolean?) {
-            mAuthTask = null
-            showProgress(false)
-
-            if (success!!) {
-                finish()
-            } else {
-                mPasswordView!!.error = getString(R.string.error_incorrect_password)
-                mPasswordView!!.requestFocus()
-            }
         }
 
         override fun onCancelled() {
@@ -212,12 +171,7 @@ class AddUserActivity : AppCompatActivity() {
     }
 
     companion object {
-
-        /**
-         * A dummy authentication store containing known user names and passwords.
-         * TODO: remove after connecting to a real authentication system.
-         */
-        private val DUMMY_CREDENTIALS = arrayOf("foo@example.com:hello", "bar@example.com:world")
+        private val CREDENTIALS: MutableList<User> = mutableListOf()
     }
 }
 
