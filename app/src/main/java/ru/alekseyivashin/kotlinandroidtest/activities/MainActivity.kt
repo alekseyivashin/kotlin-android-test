@@ -3,6 +3,7 @@ package ru.alekseyivashin.kotlinandroidtest.activities
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import com.facebook.stetho.Stetho
 import org.jetbrains.anko.startActivity
 import ru.alekseyivashin.kotlinandroidtest.R
 

@@ -3,14 +3,11 @@ package ru.alekseyivashin.kotlinandroidtest.activities
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.annotation.TargetApi
-import android.support.v7.app.AppCompatActivity
-
 import android.os.AsyncTask
-
 import android.os.Build
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.AutoCompleteTextView
@@ -18,10 +15,9 @@ import android.widget.EditText
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_add_user.*
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.debug
 import org.jetbrains.anko.info
-import org.jetbrains.anko.warn
 import ru.alekseyivashin.kotlinandroidtest.R
+import ru.alekseyivashin.kotlinandroidtest.database.DBUtils
 import ru.alekseyivashin.kotlinandroidtest.models.User
 
 /**
@@ -96,10 +92,10 @@ class AddUserActivity : AppCompatActivity() {
         val errorPasswordInvalid: String = getString(R.string.error_invalid_password)
 
         return when {
-            TextUtils.isEmpty(email)    -> Pair(mEmailView as TextView, errorFieldRequired)
+            TextUtils.isEmpty(email) -> Pair(mEmailView as TextView, errorFieldRequired)
             TextUtils.isEmpty(password) -> Pair(mPasswordView as TextView, errorFieldRequired)
-            !email.contains("@")        -> Pair(mEmailView as TextView, errorEmailInvalid)
-            password.length < 4         -> Pair(mPasswordView as TextView, errorPasswordInvalid)
+            !email.contains("@") -> Pair(mEmailView as TextView, errorEmailInvalid)
+            password.length < 4 -> Pair(mPasswordView as TextView, errorPasswordInvalid)
             else -> null
         }
     }
@@ -149,14 +145,9 @@ class AddUserActivity : AppCompatActivity() {
         override fun doInBackground(vararg params: Void): Boolean? {
             // TODO: attempt authentication against a network service.
 
-            try {
-                // Simulate network access.
-                Thread.sleep(2000)
-            } catch (e: InterruptedException) {
-                return false
-            }
-
             CREDENTIALS.add(User(mEmail, mPassword))
+
+            DBUtils.insertUser(applicationContext, User(mEmail, mPassword))
 
             logger.info(CREDENTIALS)
 
