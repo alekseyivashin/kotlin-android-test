@@ -143,11 +143,9 @@ class AddUserActivity : AppCompatActivity() {
         private val logger = AnkoLogger("USER")
 
         override fun doInBackground(vararg params: Void): Boolean? {
-            // TODO: attempt authentication against a network service.
+//            CREDENTIALS.add(User(mEmail, mPassword))
 
-            CREDENTIALS.add(User(mEmail, mPassword))
-
-            DBUtils.insertUser(applicationContext, User(mEmail, mPassword))
+            DBUtils.insertUser(applicationContext, User(null, mEmail, mPassword))
 
             logger.info(CREDENTIALS)
 
