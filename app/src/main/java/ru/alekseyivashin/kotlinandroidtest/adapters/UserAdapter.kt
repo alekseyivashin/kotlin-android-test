@@ -5,7 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.CompoundButton
 import kotlinx.android.synthetic.main.user_item.view.*
+import org.jetbrains.anko.toast
 import ru.alekseyivashin.kotlinandroidtest.R
 import ru.alekseyivashin.kotlinandroidtest.models.User
 
@@ -21,6 +23,9 @@ class UserAdapter(val context: Context, val users: List<User>) : BaseAdapter() {
         view.userEmail.text = user.email
         view.userPassword.text = user.password
 
+        view.checkBox.tag = position
+        view.checkBox.setOnCheckedChangeListener(onCheckBoxClick)
+
         return view
     }
 
@@ -29,5 +34,14 @@ class UserAdapter(val context: Context, val users: List<User>) : BaseAdapter() {
     override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getCount(): Int = users.size
+
+    val onCheckBoxClick = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        context.toast("Клик по позиции с номером ${buttonView.tag}. Состояние: $isChecked")
+        checkedUsersIds.add(buttonView.tag as Int)
+    }
+
+    companion object {
+        val checkedUsersIds: MutableList<Int> = mutableListOf()
+    }
 
 }
