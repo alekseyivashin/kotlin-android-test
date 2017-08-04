@@ -1,15 +1,20 @@
 package ru.alekseyivashin.kotlinandroidtest.common
 
 import android.content.Context
+import android.util.SparseBooleanArray
 import android.view.MenuItem
 import android.view.animation.AnimationUtils
 import android.widget.CompoundButton
+import android.widget.ListView
+import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.toast
 import ru.alekseyivashin.kotlinandroidtest.R
 import ru.alekseyivashin.kotlinandroidtest.activities.MainActivity
+import ru.alekseyivashin.kotlinandroidtest.database.DBUtils
+import ru.alekseyivashin.kotlinandroidtest.models.User
 
 fun onUserItemClick(context: Context, checkBoxView: CompoundButton, isChecked: Boolean) {
-    context.toast("Клик по позиции с номером ${checkBoxView.tag}. Состояние: $isChecked")
+//    context.toast("Клик по позиции с номером ${checkBoxView.tag}. Состояние: $isChecked")
 
     checkBoxView.isChecked = isChecked
 
@@ -24,20 +29,20 @@ fun onUserItemClick(context: Context, checkBoxView: CompoundButton, isChecked: B
 
     if (Static.checkedUsersIds.size > 0) {
         if (Static.checkedUsersIds.size > 1) {
-//            menuItemAnimation(context, changeMenuItem, false)
             changeMenuItem.isVisible = false
         } else {
-//            menuItemAnimation(context, deleteMenuItem, true)
-//            menuItemAnimation(context, changeMenuItem, true)
             deleteMenuItem.isVisible = true
             changeMenuItem.isVisible = true
         }
     } else {
-//        menuItemAnimation(context, deleteMenuItem, false)
-//        menuItemAnimation(context, changeMenuItem, false)
         deleteMenuItem.isVisible = false
         changeMenuItem.isVisible = false
     }
+}
+
+fun onDeleteMenuItemClick(context: Context): Boolean {
+    DBUtils.deleteUsers(context, Static.checkedUsersIds)
+    return true
 }
 
 object Static {

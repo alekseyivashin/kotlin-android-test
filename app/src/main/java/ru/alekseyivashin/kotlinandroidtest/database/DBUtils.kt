@@ -2,10 +2,8 @@ package ru.alekseyivashin.kotlinandroidtest.database
 
 import android.content.ContentValues
 import android.content.Context
-import org.jetbrains.anko.db.classParser
-import org.jetbrains.anko.db.insert
-import org.jetbrains.anko.db.parseList
-import org.jetbrains.anko.db.select
+import org.jetbrains.anko.db.*
+import org.jetbrains.anko.toast
 import ru.alekseyivashin.kotlinandroidtest.models.User
 
 object DBUtils {
@@ -23,6 +21,14 @@ object DBUtils {
             select(UserTable.NAME).exec {
                 parseList(classParser<User>())
             }
+        }
+    }
+
+    fun deleteUsers(ctx: Context, ids: List<Int>) {
+        val idsString = ids.joinToString()
+        ctx.database.use {
+            var result = execSQL("DELETE FROM ${UserTable.NAME} WHERE ID IN (${idsString})")
+            ctx.toast("Удалено ${ids.size} пользователей")
         }
     }
 }

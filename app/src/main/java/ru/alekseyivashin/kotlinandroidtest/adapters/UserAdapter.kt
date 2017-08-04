@@ -5,8 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.CompoundButton
 import kotlinx.android.synthetic.main.user_item.view.*
 import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
+import org.jetbrains.anko.toast
 import ru.alekseyivashin.kotlinandroidtest.R
 import ru.alekseyivashin.kotlinandroidtest.common.onUserItemClick
 import ru.alekseyivashin.kotlinandroidtest.models.User
@@ -23,7 +25,7 @@ class UserAdapter(val context: Context, val users: List<User>) : BaseAdapter() {
         view.userEmail.text = user.email
         view.userPassword.text = user.password
 
-        view.checkBox.tag = position
+        view.checkBox.tag = user.id
         return view
     }
 
